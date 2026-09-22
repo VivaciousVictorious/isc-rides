@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book a Run</title>
+<style>
+  :root {
+    --navy: #002F60;
+    --gold: #CFB67C;
+    --bg: #f3f5f8;
+    --card: #ffffff;
+    --ink: #0f1c2e;
+    --muted: #566275;
+    --line: #d7dde6;
+    --accent: #002F60;
+    --accent-ink: #ffffff;
+    --sel: #e6ecf4;
+    --focus: #002F60;
+    --warn: #b42318;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1727;
+      --card: #12233b;
+      --ink: #eef1f7;
+      --muted: #a9b4c6;
+      --line: #26395a;
+      --accent: #CFB67C;
+      --accent-ink: #002F60;
+      --sel: #1b3355;
+      --focus: #CFB67C;
+      --warn: #ff8a80;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1727;
+    --card: #12233b;
+    --ink: #eef1f7;
+    --muted: #a9b4c6;
+    --line: #26395a;
+    --accent: #CFB67C;
+    --accent-ink: #002F60;
+    --sel: #1b3355;
+    --focus: #CFB67C;
+    --warn: #ff8a80;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); background: #002F60; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .inner { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+  .brand { background: var(--navy); color: #fff; border-bottom: 4px solid var(--gold); padding: 22px 0 24px; }
+  .eyebrow {
+    color: var(--gold); font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .unit { font-size: 0.95rem; opacity: 0.9; margin-top: 2px; }
+  .brand h1 {
+    margin: 14px 0 6px; font-size: 2rem; letter-spacing: -0.01em; line-height: 1.15;
+    font-family: Georgia, "Times New Roman", serif; font-weight: 700;
+  }
+  .brand p { margin: 0; color: #d6deea; }
+  .hours { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+  .hours li {
+    background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(207,182,124,0.55);
+    border-radius: 999px; padding: 5px 12px; font-size: 0.84rem; font-weight: 600;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 8px 16px 40px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; margin-top: 18px; border-top: 3px solid var(--gold);
+  }
+  .card h2 { margin: 0 0 12px; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; }
+  .step {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    background: var(--accent); color: var(--accent-ink); font-size: 0.8rem; font-weight: 700;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: inherit; color: var(--ink); background: var(--card);
+    border: 1.5px solid var(--line); border-radius: 10px;
+    padding: 9px 13px; cursor: pointer; min-height: 44px; text-align: left;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .chip small { display: block; color: inherit; opacity: 0.75; font-size: 0.75rem; }
+  .badge {
+    display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    background: var(--gold); color: var(--navy);
+  }
+  .chip[aria-pressed="true"] .badge { background: var(--accent-ink); color: var(--accent); }
+  .empty { color: var(--muted); margin: 0; }
+  label { display: block; font-weight: 600; font-size: 0.9rem; margin: 14px 0 5px; }
+  label:first-of-type { margin-top: 0; }
+  input, textarea, select {
+    width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+    border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
+  input:focus, textarea:focus, select:focus, .chip:focus-visible, .btn:focus-visible {
+    outline: 2px solid var(--focus); outline-offset: 2px;
+  }
+  textarea { resize: vertical; min-height: 72px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+  .btn {
+    display: inline-block; text-align: center; text-decoration: none; cursor: pointer;
+    font: inherit; font-weight: 700; border-radius: 10px; padding: 12px 18px; min-height: 46px;
+    background: var(--accent); color: var(--accent-ink); border: 1.5px solid var(--accent);
+  }
+  .btn.secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn.secondary:hover { border-color: var(--accent); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .err { color: var(--warn); font-size: 0.9rem; margin: 12px 0 0; min-height: 1.2em; }
+  .summary { border-left: 4px solid var(--gold); padding: 4px 0 4px 14px; margin: 0 0 14px; }
+  .summary strong { display: block; }
+  pre.req {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; white-space: pre-wrap; word-break: break-word; font: inherit; font-size: 0.88rem;
+    margin: 0 0 14px; overflow-x: auto;
+  }
+  .note { color: var(--muted); font-size: 0.85rem; margin: 14px 0 0; }
+  .foot { background: var(--navy); color: #d6deea; border-top: 4px solid var(--gold); padding: 20px 0 24px; font-size: 0.85rem; }
+  .foot strong { display: block; color: #fff; font-size: 0.95rem; }
+  .foot a { color: var(--gold); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header class="brand">
+  <div class="inner">
+    <div class="eyebrow">Oral Roberts University</div>
+    <div class="unit">International Student Relations</div>
+    <h1>Book a Run</h1>
+    <p>Choose the type of run, a day and a departure time, then send your request to the coordinators.</p>
+    <ul class="hours">
+      <li>Social Security &middot; Mon &ndash; Fri 9 AM &ndash; 5 PM (book 48+ hours ahead)</li>
+      <li>Walmart &amp; Bank &middot; Mon, Wed, Fri 9 AM &ndash; 5 PM; Tue 9 AM &ndash; 12 PM; Thu 1 &ndash; 5 PM</li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <main id="booking">
+    <section class="card" aria-labelledby="h-type">
+      <h2 id="h-type"><span class="step">1</span>Choose a run</h2>
+      <div class="chips" id="types" role="group" aria-label="Run types"></div>
+      <p class="note">Social Security rides must be booked at least 48 hours in advance. Cancellations require at least 24 hours&rsquo; notice by email to <a href="mailto:isc@oru.edu">isc@oru.edu</a>.</p>
+    </section>
+
+    <section class="card" aria-labelledby="h-date">
+      <h2 id="h-date"><span class="step">2</span>Choose a day</h2>
+      <p class="empty" id="date-empty">Select a run type first.</p>
+      <div class="chips" id="dates" role="group" aria-label="Available days"></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-time">
+      <h2 id="h-time"><span class="step">3</span>Choose a time</h2>
+      <p class="empty" id="time-empty">Select a day first.</p>
+      <div class="chips" id="times" role="group" aria-label="Available times"></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-you">
+      <h2 id="h-you"><span class="step">4</span>Your details</h2>
+      <label for="name">Full name</label>
+      <input id="name" type="text" autocomplete="name" placeholder="Your name">
+      <div class="row">
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email" placeholder="you@oru.edu">
+        </div>
+        <div>
+          <label for="phone">Phone (optional)</label>
+          <input id="phone" type="tel" autocomplete="tel" placeholder="918-555-0123">
+        </div>
+      </div>
+      <label for="notes">Notes (optional)</label>
+      <textarea id="notes" placeholder="Anything the driver should know"></textarea>
+      <p class="err" id="err" role="alert"></p>
+      <div class="actions">
+        <button class="btn" id="submit" type="button">Send booking request</button>
+      </div>
+    </section>
+  </main>
+
+  <section class="card" id="done" hidden aria-live="polite">
+    <h2>Almost done: send your request</h2>
+    <div class="summary" id="summary"></div>
+    <pre class="req" id="reqtext"></pre>
+    <div class="actions">
+      <a class="btn" id="mailto" href="#" target="_blank" rel="noopener">Open email to coordinators</a>
+      <button class="btn secondary" id="copy" type="button">Copy request text</button>
+      <button class="btn secondary" id="again" type="button">Start over</button>
+    </div>
+    <p class="note" id="copynote"></p>
+    <p class="note">All riders must be present in the ISC at least 10 minutes before the scheduled departure time.</p>
+  </section>
+</div>
+
+<footer class="foot">
+  <div class="inner">
+    <strong>International Student Relations</strong>
+    Oral Roberts University &middot; Tulsa, Oklahoma<br>
+    Questions or cancellations? <a href="mailto:isc@oru.edu" target="_blank" rel="noopener">isc@oru.edu</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var STAFF_EMAILS = ["isc@oru.edu"];
+  var STAFF_TO = STAFF_EMAILS.join(",");
+  var STAFF_LIST = STAFF_EMAILS.join(" and ");
+  var BOOKING_END = new Date(2026, 11, 20);
+  var SSA_NOTICE_HOURS = 48;
+  var STEP_MIN = 30;
+  var DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  // minutes from midnight
+  var FULL_DAY = { start: 9 * 60, end: 17 * 60 };
+  var ALL_WEEKDAYS = { 1: FULL_DAY, 2: FULL_DAY, 3: FULL_DAY, 4: FULL_DAY, 5: FULL_DAY };
+  var ERRAND_WINDOWS = {
+    1: FULL_DAY,
+    2: { start: 9 * 60, end: 12 * 60 },
+    3: FULL_DAY,
+    4: { start: 13 * 60, end: 17 * 60 },
+    5: FULL_DAY
+  };
+
+  var TYPES = {
+    ssa: {
+      label: "Social Security run",
+      blurb: "Mon – Fri · 9 AM – 5 PM · 48-hour notice required",
+      priority: true,
+      windows: ALL_WEEKDAYS
+    },
+    errands: {
+      label: "Walmart & Bank run",
+      blurb: "Mon – Fri · Hours vary by day",
+      windows: ERRAND_WINDOWS
+    }
+  };
+  var TYPE_ORDER = ["ssa", "errands"];
+
+  var state = { type: null, date: null, time: null };
+  var dates = [];
+  var $ = function (id) { return document.getElementById(id); };
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function fmtTime(mins) {
+    var h = Math.floor(mins / 60), m = mins % 60;
+    var ap = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12 === 0 ? 12 : h % 12;
+    return h12 + ":" + pad(m) + " " + ap;
+  }
+  function dateKey(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function longDate(d) {
+    return DAYNAMES[d.getDay()] + ", " + MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+  }
+  function windowFor(d) {
+    return state.type ? TYPES[state.type].windows[d.getDay()] : null;
+  }
+
+  function buildDates() {
+    var out = [];
+    if (!state.type) return out;
+    var now = new Date();
+    var start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    var daysAvailable = Math.floor((BOOKING_END - start) / 86400000);
+    for (var i = 0; i <= daysAvailable; i++) {
+      var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+      var w = windowFor(d);
+      if (!w) continue;
+      if (state.type === "ssa") {
+        var lastDeparture = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor((w.end - STEP_MIN) / 60), (w.end - STEP_MIN) % 60);
+        if (lastDeparture.getTime() - now.getTime() < SSA_NOTICE_HOURS * 60 * 60 * 1000) continue;
+      }
+      if (i === 0 && nowMin >= w.end - STEP_MIN) continue;
+      out.push(d);
+    }
+    return out;
+  }
+
+  function slotsFor(d) {
+    var w = windowFor(d);
+    var slots = [];
+    if (!w) return slots;
+    var now = new Date();
+    var isToday = dateKey(d) === dateKey(now);
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    for (var t = w.start; t <= w.end - STEP_MIN; t += STEP_MIN) {
+      if (isToday && t <= nowMin) continue;
+      if (state.type === "ssa") {
+        var departure = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(t / 60), t % 60);
+        if (departure.getTime() - now.getTime() < SSA_NOTICE_HOURS * 60 * 60 * 1000) continue;
+      }
+      slots.push(t);
+    }
+    return slots;
+  }
+
+  function selectedDate() {
+    for (var i = 0; i < dates.length; i++) if (dateKey(dates[i]) === state.date) return dates[i];
+    return null;
+  }
+
+  function renderTypes() {
+    var box = $("types");
+    box.innerHTML = "";
+    TYPE_ORDER.forEach(function (key) {
+      var t = TYPES[key];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.setAttribute("aria-pressed", state.type === key ? "true" : "false");
+      b.appendChild(document.createTextNode(t.label));
+      if (t.priority) {
+        var badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = "Priority";
+        b.appendChild(badge);
+      }
+      var small = document.createElement("small");
+      small.textContent = t.blurb;
+      b.appendChild(small);
+      b.addEventListener("click", function () {
+        if (state.type === key) return;
+        state.type = key;
+        state.date = null;
+        state.time = null;
+        dates = buildDates();
+        renderTypes();
+        renderDates();
+        renderTimes();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function renderDates() {
+    var box = $("dates");
+    box.innerHTML = "";
+    $("date-empty").hidden = !!state.type;
+    if (!state.type) return;
+    if (!dates.length) {
+      var p = document.createElement("p");
+      p.className = "empty";
+      p.textContent = "No upcoming days are available for this run right now.";
+      box.appendChild(p);
+      return;
+    }
+    dates.forEach(function (d) {
+      var w = windowFor(d);
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.setAttribute("aria-pressed", state.date === dateKey(d) ? "true" : "false");
+      b.appendChild(document.createTextNode(DAYNAMES[d.getDay()].slice(0, 3) + ", " + MONTHS[d.getMonth()] + " " + d.getDate()));
+      var small = document.createElement("small");
+      small.textContent = fmtTime(w.start) + " – " + fmtTime(w.end);
+      b.appendChild(small);
+      b.addEventListener("click", function () {
+        state.date = dateKey(d);
+        state.time = null;
+        renderDates();
+        renderTimes();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function renderTimes() {
+    var box = $("times");
+    box.innerHTML = "";
+    var d = selectedDate();
+    $("time-empty").hidden = !!d;
+    if (!d) return;
+    slotsFor(d).forEach(function (t) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = fmtTime(t);
+      b.setAttribute("aria-pressed", state.time === t ? "true" : "false");
+      b.addEventListener("click", function () {
+        state.time = t;
+        renderTimes();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function buildRequest() {
+    var d = selectedDate();
+    var label = TYPES[state.type].label;
+    var isPriority = !!TYPES[state.type].priority;
+    var lines = [
+      "Hello,",
+      "",
+      "I would like to book a spot on the " + label + ".",
+      "",
+      "Run: " + label + (isPriority ? " (PRIORITY)" : ""),
+      "Day: " + longDate(d),
+      "Departure time: " + fmtTime(state.time),
+      "Name: " + $("name").value.trim(),
+      "Email: " + $("email").value.trim()
+    ];
+    var phone = $("phone").value.trim();
+    if (phone) lines.push("Phone: " + phone);
+    var notes = $("notes").value.trim();
+    if (notes) lines.push("Notes: " + notes);
+    if (isPriority) lines.push("Cancellation policy: Email isc@oru.edu at least 24 hours before departure.");
+    lines.push("Arrival: I will be present in the ISC at least 10 minutes before departure.");
+    lines.push("", "Thank you!");
+    return {
+      subject: (isPriority ? "PRIORITY - " : "") + label + " request: " + longDate(d) + " at " + fmtTime(state.time),
+      body: lines.join("\n"),
+      when: longDate(d) + " at " + fmtTime(state.time),
+      label: label
+    };
+  }
+
+  $("submit").addEventListener("click", function () {
+    var err = $("err");
+    err.textContent = "";
+    var name = $("name").value.trim();
+    var email = $("email").value.trim();
+    if (!state.type) { err.textContent = "Please choose a run type."; return; }
+    if (!state.date) { err.textContent = "Please choose a day."; return; }
+    if (state.time === null) { err.textContent = "Please choose a time."; return; }
+    if (!name) { err.textContent = "Please enter your name."; $("name").focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "Please enter a valid email address."; $("email").focus(); return; }
+
+    var req = buildRequest();
+    $("summary").innerHTML = "";
+    var s = document.createElement("strong");
+    s.textContent = req.label + " · " + req.when;
+    var s2 = document.createElement("span");
+    s2.textContent = "Requested by " + name;
+    $("summary").appendChild(s);
+    $("summary").appendChild(s2);
+    $("reqtext").textContent = req.body;
+    $("mailto").href = "mailto:" + STAFF_TO +
+      "?subject=" + encodeURIComponent(req.subject) +
+      "&body=" + encodeURIComponent(req.body.replace(/\n/g, "\r\n"));
+    $("copynote").textContent = "";
+    $("booking").hidden = true;
+    $("done").hidden = false;
+    window.scrollTo(0, 0);
+  });
+
+  $("copy").addEventListener("click", function () {
+    var text = "To: " + STAFF_EMAILS.join(", ") + "\nSubject: " + buildRequest().subject + "\n\n" + $("reqtext").textContent;
+    var note = $("copynote");
+    function fallback() {
+      var range = document.createRange();
+      range.selectNodeContents($("reqtext"));
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      note.textContent = "Select and copy the text above, then email it to " + STAFF_LIST + ".";
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          note.textContent = "Copied. Paste it into an email to " + STAFF_LIST + ".";
+        }, fallback);
+      } else { fallback(); }
+    } catch (e) { fallback(); }
+  });
+
+  $("again").addEventListener("click", function () {
+    state = { type: null, date: null, time: null };
+    dates = [];
+    $("done").hidden = true;
+    $("booking").hidden = false;
+    renderTypes();
+    renderDates();
+    renderTimes();
+  });
+
+  renderTypes();
+  renderDates();
+  renderTimes();
+})();
+</script>
+</body>
+</html>
