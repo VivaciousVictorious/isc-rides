@@ -145,8 +145,8 @@
     <h1>Book a Run</h1>
     <p>Choose the type of run, a day and a departure time, then send your request to the coordinators.</p>
     <ul class="hours">
-      <li>Social Security &middot; Mon &ndash; Fri 9 AM &ndash; 5 PM (book 48+ hours ahead)</li>
-      <li>Walmart &amp; Bank &middot; Mon, Wed, Fri 9 AM &ndash; 5 PM; Tue 9 AM &ndash; 12 PM; Thu 1 &ndash; 5 PM</li>
+      <li>Social Security &middot; Mon &ndash; Fri 9 AM &ndash; 5 PM (book 24+ hours ahead)</li>
+      <li>Walmart &amp; Bank &middot; Mon 9 AM &ndash; 12 PM; Wed 1 &ndash; 4 PM</li>
     </ul>
   </div>
 </header>
@@ -157,7 +157,7 @@
     <section class="card" aria-labelledby="h-type">
       <h2 id="h-type"><span class="step">1</span>Choose a run</h2>
       <div class="chips" id="types" role="group" aria-label="Run types"></div>
-      <p class="note">Social Security rides must be booked at least 48 hours in advance. Cancellations require at least 24 hours&rsquo; notice by email to <a href="mailto:isc@oru.edu">isc@oru.edu</a>.</p>
+      <p class="note">Social Security rides must be booked at least 24 hours in advance. Cancellations require at least 24 hours&rsquo; notice by email to <a href="mailto:isc@oru.edu">isc@oru.edu</a>.</p>
     </section>
 
     <section class="card" aria-labelledby="h-date">
@@ -223,7 +223,7 @@
   var STAFF_TO = STAFF_EMAILS.join(",");
   var STAFF_LIST = STAFF_EMAILS.join(" and ");
   var BOOKING_END = new Date(2026, 11, 20);
-  var SSA_NOTICE_HOURS = 48;
+  var SSA_NOTICE_HOURS = 24;
   var STEP_MIN = 30;
   var DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -232,23 +232,20 @@
   var FULL_DAY = { start: 9 * 60, end: 17 * 60 };
   var ALL_WEEKDAYS = { 1: FULL_DAY, 2: FULL_DAY, 3: FULL_DAY, 4: FULL_DAY, 5: FULL_DAY };
   var ERRAND_WINDOWS = {
-    1: FULL_DAY,
-    2: { start: 9 * 60, end: 12 * 60 },
-    3: FULL_DAY,
-    4: { start: 13 * 60, end: 17 * 60 },
-    5: FULL_DAY
+    1: { start: 9 * 60, end: 12 * 60 },
+    3: { start: 13 * 60, end: 16 * 60 }
   };
 
   var TYPES = {
     ssa: {
       label: "Social Security run",
-      blurb: "Mon – Fri · 9 AM – 5 PM · 48-hour notice required",
+      blurb: "Mon – Fri · 9 AM – 5 PM · 24-hour notice required",
       priority: true,
       windows: ALL_WEEKDAYS
     },
     errands: {
       label: "Walmart & Bank run",
-      blurb: "Mon – Fri · Hours vary by day",
+      blurb: "Mon 9 AM – 12 PM · Wed 1 – 4 PM",
       windows: ERRAND_WINDOWS
     }
   };
@@ -303,6 +300,7 @@
     var nowMin = now.getHours() * 60 + now.getMinutes();
     for (var t = w.start; t <= w.end - STEP_MIN; t += STEP_MIN) {
       if (isToday && t <= nowMin) continue;
+      if (state.type === "ssa" && (d.getDay() === 1 || d.getDay() === 3) && t >= 11 * 60 && t < 12 * 60) continue;
       if (state.type === "ssa") {
         var departure = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(t / 60), t % 60);
         if (departure.getTime() - now.getTime() < SSA_NOTICE_HOURS * 60 * 60 * 1000) continue;
