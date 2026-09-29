@@ -225,7 +225,7 @@
   var BOOKING_END = new Date(2026, 11, 20);
   var SSA_NOTICE_HOURS = 24;
   var SSA_LAST_DEPARTURE = 16 * 60;
-  var STEP_MIN = 30;
+  var STEP_MIN = 60;
   var DAYNAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -302,7 +302,7 @@
     var lastSlot = state.type === "ssa" ? SSA_LAST_DEPARTURE : w.end - STEP_MIN;
     for (var t = w.start; t <= lastSlot; t += STEP_MIN) {
       if (isToday && t <= nowMin) continue;
-      if (state.type === "ssa" && (d.getDay() === 1 || d.getDay() === 3) && t >= 11 * 60 && t < 12 * 60) continue;
+      if (state.type === "ssa" && (d.getDay() === 3 || d.getDay() === 5) && t >= 11 * 60 && t < 12 * 60) continue;
       if (state.type === "ssa") {
         var departure = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(t / 60), t % 60);
         if (departure.getTime() - now.getTime() < SSA_NOTICE_HOURS * 60 * 60 * 1000) continue;
