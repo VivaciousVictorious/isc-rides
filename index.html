@@ -174,39 +174,36 @@
 
     <section class="card" aria-labelledby="h-you">
       <h2 id="h-you"><span class="step">4</span>Your details</h2>
-      <label for="name">Full name</label>
-      <input id="name" type="text" autocomplete="name" placeholder="Your name">
+      <div class="row">
+        <div>
+          <label for="first-name">First name</label>
+          <input id="first-name" type="text" autocomplete="given-name" placeholder="First name">
+        </div>
+        <div>
+          <label for="last-name">Last name</label>
+          <input id="last-name" type="text" autocomplete="family-name" placeholder="Last name">
+        </div>
+      </div>
       <div class="row">
         <div>
           <label for="email">Email</label>
           <input id="email" type="email" autocomplete="email" placeholder="you@oru.edu">
         </div>
         <div>
-          <label for="phone">Phone (optional)</label>
-          <input id="phone" type="tel" autocomplete="tel" placeholder="918-555-0123">
+          <label for="z-number">Z Number</label>
+          <input id="z-number" type="text" autocomplete="off" placeholder="Z123456789">
         </div>
       </div>
+      <label for="phone">Phone (optional)</label>
+      <input id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="918-555-0123">
       <label for="notes">Notes (optional)</label>
-      <textarea id="notes" placeholder="Anything the driver should know"></textarea>
+      <textarea id="notes" maxlength="50" placeholder="Anything the driver should know (50 characters maximum)"></textarea>
       <p class="err" id="err" role="alert"></p>
       <div class="actions">
-        <button class="btn" id="submit" type="button">Send booking request</button>
+        <button class="btn" id="submit" type="button">Submit booking request</button>
       </div>
     </section>
   </main>
-
-  <section class="card" id="done" hidden aria-live="polite">
-    <h2>Almost done: send your request</h2>
-    <div class="summary" id="summary"></div>
-    <pre class="req" id="reqtext"></pre>
-    <div class="actions">
-      <a class="btn" id="mailto" href="#" target="_blank" rel="noopener">Open email to coordinators</a>
-      <button class="btn secondary" id="copy" type="button">Copy request text</button>
-      <button class="btn secondary" id="again" type="button">Start over</button>
-    </div>
-    <p class="note" id="copynote"></p>
-    <p class="note">All riders must be present in the ISC at least 10 minutes before the scheduled departure time.</p>
-  </section>
 </div>
 
 <footer class="foot">
@@ -219,9 +216,8 @@
 
 <script>
 (function () {
-  var STAFF_EMAILS = ["isc@oru.edu"];
-  var STAFF_TO = STAFF_EMAILS.join(",");
-  var STAFF_LIST = STAFF_EMAILS.join(" and ");
+  var MACHFORM_URL = "https://forms.oru.edu/view.php?id=2031159";
+  var MACHFORM_ID = "2031159";
   var BOOKING_END = new Date(2026, 11, 20);
   var SSA_NOTICE_HOURS = 24;
   var SSA_LAST_DEPARTURE = 16 * 60;
@@ -251,6 +247,17 @@
     }
   };
   var TYPE_ORDER = ["ssa", "errands"];
+  var MACHFORM_RUN_TYPES = { ssa: "1", errands: "2" };
+  var MACHFORM_TIMES = {
+    540: "1",
+    600: "3",
+    660: "15",
+    720: "13",
+    780: "11",
+    840: "9",
+    900: "7",
+    960: "5"
+  };
 
   var state = { type: null, date: null, time: null };
   var dates = [];
@@ -402,93 +409,60 @@
     });
   }
 
-  function buildRequest() {
-    var d = selectedDate();
-    var label = TYPES[state.type].label;
-    var isPriority = !!TYPES[state.type].priority;
-    var lines = [
-      "Hello,",
-      "",
-      "I would like to book a spot on the " + label + ".",
-      "",
-      "Run: " + label + (isPriority ? " (PRIORITY)" : ""),
-      "Day: " + longDate(d),
-      "Departure time: " + fmtTime(state.time),
-      "Name: " + $("name").value.trim(),
-      "Email: " + $("email").value.trim()
-    ];
-    var phone = $("phone").value.trim();
-    if (phone) lines.push("Phone: " + phone);
-    var notes = $("notes").value.trim();
-    if (notes) lines.push("Notes: " + notes);
-    if (isPriority) lines.push("Cancellation policy: Email isc@oru.edu at least 24 hours before departure.");
-    lines.push("Arrival: I will be present in the ISC at least 10 minutes before departure.");
-    lines.push("", "Thank you!");
-    return {
-      subject: (isPriority ? "PRIORITY - " : "") + label + " request: " + longDate(d) + " at " + fmtTime(state.time),
-      body: lines.join("\n"),
-      when: longDate(d) + " at " + fmtTime(state.time),
-      label: label
-    };
+  function addField(form, name, value) {
+    var input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  }
+
+  function submitToMachForm(d, phoneDigits) {
+    var form = document.createElement("form");
+    form.method = "post";
+    form.action = MACHFORM_URL;
+    form.style.display = "none";
+
+    addField(form, "form_id", MACHFORM_ID);
+    addField(form, "submit_form", "Submit");
+    addField(form, "page_number", "1");
+    addField(form, "element_1_1", $("first-name").value.trim());
+    addField(form, "element_1_2", $("last-name").value.trim());
+    addField(form, "element_2", $("email").value.trim());
+    addField(form, "element_4", $("z-number").value.trim());
+    addField(form, "element_3_1", phoneDigits ? phoneDigits.slice(0, 3) : "");
+    addField(form, "element_3_2", phoneDigits ? phoneDigits.slice(3, 6) : "");
+    addField(form, "element_3_3", phoneDigits ? phoneDigits.slice(6, 10) : "");
+    addField(form, "element_11", MACHFORM_RUN_TYPES[state.type]);
+    addField(form, "element_9_1", pad(d.getMonth() + 1));
+    addField(form, "element_9_2", pad(d.getDate()));
+    addField(form, "element_9_3", String(d.getFullYear()));
+    addField(form, "element_9_datepick", "");
+    addField(form, "element_10", MACHFORM_TIMES[state.time]);
+    addField(form, "element_12", $("notes").value.trim());
+
+    document.body.appendChild(form);
+    form.submit();
   }
 
   $("submit").addEventListener("click", function () {
     var err = $("err");
     err.textContent = "";
-    var name = $("name").value.trim();
+    var firstName = $("first-name").value.trim();
+    var lastName = $("last-name").value.trim();
     var email = $("email").value.trim();
+    var zNumber = $("z-number").value.trim();
+    var phoneDigits = $("phone").value.replace(/\D/g, "");
     if (!state.type) { err.textContent = "Please choose a run type."; return; }
     if (!state.date) { err.textContent = "Please choose a day."; return; }
     if (state.time === null) { err.textContent = "Please choose a time."; return; }
-    if (!name) { err.textContent = "Please enter your name."; $("name").focus(); return; }
+    if (!firstName) { err.textContent = "Please enter your first name."; $("first-name").focus(); return; }
+    if (!lastName) { err.textContent = "Please enter your last name."; $("last-name").focus(); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "Please enter a valid email address."; $("email").focus(); return; }
+    if (!zNumber) { err.textContent = "Please enter your Z Number."; $("z-number").focus(); return; }
+    if (phoneDigits && phoneDigits.length !== 10) { err.textContent = "Please enter a 10-digit phone number or leave it blank."; $("phone").focus(); return; }
 
-    var req = buildRequest();
-    $("summary").innerHTML = "";
-    var s = document.createElement("strong");
-    s.textContent = req.label + " · " + req.when;
-    var s2 = document.createElement("span");
-    s2.textContent = "Requested by " + name;
-    $("summary").appendChild(s);
-    $("summary").appendChild(s2);
-    $("reqtext").textContent = req.body;
-    $("mailto").href = "mailto:" + STAFF_TO +
-      "?subject=" + encodeURIComponent(req.subject) +
-      "&body=" + encodeURIComponent(req.body.replace(/\n/g, "\r\n"));
-    $("copynote").textContent = "";
-    $("booking").hidden = true;
-    $("done").hidden = false;
-    window.scrollTo(0, 0);
-  });
-
-  $("copy").addEventListener("click", function () {
-    var text = "To: " + STAFF_EMAILS.join(", ") + "\nSubject: " + buildRequest().subject + "\n\n" + $("reqtext").textContent;
-    var note = $("copynote");
-    function fallback() {
-      var range = document.createRange();
-      range.selectNodeContents($("reqtext"));
-      var sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-      note.textContent = "Select and copy the text above, then email it to " + STAFF_LIST + ".";
-    }
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () {
-          note.textContent = "Copied. Paste it into an email to " + STAFF_LIST + ".";
-        }, fallback);
-      } else { fallback(); }
-    } catch (e) { fallback(); }
-  });
-
-  $("again").addEventListener("click", function () {
-    state = { type: null, date: null, time: null };
-    dates = [];
-    $("done").hidden = true;
-    $("booking").hidden = false;
-    renderTypes();
-    renderDates();
-    renderTimes();
+    submitToMachForm(selectedDate(), phoneDigits);
   });
 
   renderTypes();
